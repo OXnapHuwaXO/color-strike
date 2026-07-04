@@ -636,4 +636,9 @@ gameOverEl.addEventListener('click',e=>{if(!slowMo)resetGame()});
 gameOverEl.addEventListener('touchend',e=>{if(!slowMo){e.preventDefault();resetGame()}});
 
 updateColorUI();
+
+if('serviceWorker'in navigator){
+navigator.serviceWorker.register('sw.js');
+}
+
 gameLoop(0);
