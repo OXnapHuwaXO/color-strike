@@ -647,6 +647,10 @@ return 1;
 function onPointerDown(x,y){
 touchStartX=x;touchStartY=y;
 touchMoved=false;tapHandled=false;
+if(gameRunning&&!gameOverFlag&&!slowMo){
+const newLane=laneFromX(x);
+if(newLane!==targetLane){targetLane=newLane;laneTransition=0;tapHandled=true}
+}
 }
 
 function onPointerMove(x,y){
