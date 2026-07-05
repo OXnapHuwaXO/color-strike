@@ -210,6 +210,12 @@ if(allColors.length>4&&Math.random()<0.2)colorIdx=4+Math.floor(Math.random()*(al
 const y=trackOffset+H+100+Math.random()*60;
 const h=45+Math.random()*35;
 obstacles.push({lane,colorIdx,y,height:h,passed:false,active:false});
+if(score>150&&Math.random()<Math.min(0.45,score*0.0003)){
+let lane2;do{lane2=Math.floor(Math.random()*LANE_COUNT)}while(lane2===lane);
+let ci2=Math.floor(Math.random()*allColors.length);
+if(allColors.length>4&&Math.random()<0.2)ci2=4+Math.floor(Math.random()*(allColors.length-4));
+obstacles.push({lane:lane2,colorIdx:ci2,y:y+15+Math.random()*25,height:40+Math.random()*30,passed:false,active:false});
+}
 }
 
 function resetGame(){
@@ -343,7 +349,7 @@ if(score>2)playTick();
 }
 
 frameCount+=dtScale;
-const spawnInterval=Math.max(22,85-Math.floor(score/50)*2);
+const spawnInterval=Math.max(25,90-Math.floor(score/40)*2);
 if(frameCount>=spawnInterval){
 frameCount=0;spawnObstacle();
 }
