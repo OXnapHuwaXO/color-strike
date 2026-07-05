@@ -627,7 +627,7 @@ requestAnimationFrame(gameLoop);
 let touchStartX=0,touchStartY=0;
 let touchMoved=false;
 
-function handleTap(){
+function changeColor(){
 if(slowMo)return;
 if(!gameRunning||gameOverFlag)return;
 initAudio();
@@ -647,10 +647,6 @@ return 1;
 function onPointerDown(x,y){
 touchStartX=x;touchStartY=y;
 touchMoved=false;tapHandled=false;
-if(gameRunning&&!gameOverFlag&&!slowMo){
-const newLane=laneFromX(x);
-if(newLane!==targetLane){targetLane=newLane;laneTransition=0;tapHandled=true}
-}
 }
 
 function onPointerMove(x,y){
@@ -665,7 +661,11 @@ if(newLane!==targetLane){targetLane=newLane;laneTransition=0;tapHandled=true}
 function onPointerUp(){
 if(!started){startGame();return}
 if(gameOverFlag&&!slowMo){resetGame();return}
-if(!touchMoved&&!tapHandled){tapHandled=true;handleTap()}
+if(!touchMoved&&!tapHandled){
+tapHandled=true;
+if(touchStartX<W/2&&targetLane>0){targetLane--;laneTransition=0;changeColor()}
+else if(touchStartX>=W/2&&targetLane<2){targetLane++;laneTransition=0;changeColor()}
+}
 }
 
 let started=false;
@@ -688,7 +688,11 @@ onPointerUp();
 canvas.addEventListener('click',e=>{
 if(!started){startGame();return}
 if(gameOverFlag&&!slowMo){resetGame();return}
-if(!tapHandled){tapHandled=true;handleTap()}
+if(!tapHandled){
+tapHandled=true;
+if(e.clientX<W/2&&targetLane>0){targetLane--;laneTransition=0;changeColor()}
+else if(e.clientX>=W/2&&targetLane<2){targetLane++;laneTransition=0;changeColor()}
+}
 });
 
 let mouseDown=false;
@@ -700,9 +704,8 @@ document.addEventListener('keydown',e=>{
 if(!started&&(e.key===' '||e.key==='Enter')){e.preventDefault();startGame();return}
 if(gameOverFlag&&!slowMo&&(e.key===' '||e.key==='Enter')){e.preventDefault();resetGame();return}
 if(!gameRunning||gameOverFlag||slowMo)return;
-if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();handleTap()}
-if(e.key==='ArrowRight'&&targetLane<2){targetLane++;laneTransition=0}
-if(e.key==='ArrowLeft'&&targetLane>0){targetLane--;laneTransition=0}
+if(e.key==='ArrowRight'&&targetLane<2){e.preventDefault();targetLane++;laneTransition=0;changeColor()}
+if(e.key==='ArrowLeft'&&targetLane>0){e.preventDefault();targetLane--;laneTransition=0;changeColor()}
 });
 
 startBtn.addEventListener('click',e=>{e.stopPropagation();if(!started)startGame()});
