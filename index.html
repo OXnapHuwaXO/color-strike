@@ -20,16 +20,28 @@
 <div id="color-label">&#9679; red</div>
 </div>
 <div id="start-screen">
+<div id="settings-btn">&#9881;</div>
 <h1>Color Strike</h1>
-<div class="sub">Match background color to reveal obstacles<br>Swipe to dodge</div>
-<div class="mechanics">&#9679; Obstacles dangerous only when colors match<br>&#9679; Tap to change background color<br>&#9679; Swipe left/right to dodge</div>
-<div class="tap-btn">Tap to play</div>
+<div class="sub" data-key="sub">Match background color to reveal obstacles<br>Swipe to dodge</div>
+<div class="mechanics" data-key="mech">&#9679; Obstacles dangerous only when colors match<br>&#9679; Tap to change background color<br>&#9679; Swipe left/right to dodge</div>
+<div class="tap-btn" data-key="tap">Tap to play</div>
+</div>
+<div id="settings-overlay">
+<div id="settings-close">&times;</div>
+<h2 data-key="settingsTitle">Settings</h2>
+<div class="setting-row">
+<span data-key="langLabel">Language</span>
+<div class="lang-options">
+<label class="lang-opt"><input type="radio" name="lang" value="ru"><span>Русский</span></label>
+<label class="lang-opt"><input type="radio" name="lang" value="en"><span>English</span></label>
+</div>
+</div>
 </div>
 <div id="game-over">
-<h1>Game Over</h1>
+<h1 data-key="goTitle">Game Over</h1>
 <div class="final" id="final-score">Score: 0</div>
 <div class="best" id="best-score">Best: 0</div>
-<button id="restart-btn">Play Again</button>
+<button id="restart-btn" data-key="restart">Play Again</button>
 </div>
 <script src="game.js"></script>
 </body>

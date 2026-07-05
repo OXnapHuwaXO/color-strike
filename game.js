@@ -34,9 +34,50 @@ const EXTRA_COLORS=[
 {name:'mint',hex:'#00b894',alt:'#00a381'}
 ];
 
+const LANG={
+en:{
+sub:'Match background color to reveal obstacles<br>Swipe to dodge',
+mech:'\u25cf Obstacles dangerous only when colors match<br>\u25cf Tap to change background color<br>\u25cf Swipe left/right to dodge',
+tap:'Tap to play',
+settingsTitle:'Settings',
+langLabel:'Language',
+goTitle:'Game Over',
+restart:'Play Again',
+mirror:'\u276E MIRROR \u276F',
+colors:{red:'red',green:'green',blue:'blue',yellow:'yellow',purple:'purple',orange:'orange',cyan:'cyan',pink:'pink',indigo:'indigo',mint:'mint'},
+comboX:'{n}x',
+score:'Score: {n}',
+best:'Best: {n}'
+},
+ru:{
+sub:'Подбирайте цвет фона, чтобы увидеть препятствия<br>Свайпайте, чтобы уклоняться',
+mech:'\u25cf Препятствия опасны только когда цвет совпадает<br>\u25cf Тапните, чтобы сменить цвет фона<br>\u25cf Свайп влево/вправо для уклонения',
+tap:'Начать игру',
+settingsTitle:'Настройки',
+langLabel:'Язык',
+goTitle:'Игра окончена',
+restart:'Заново',
+mirror:'\u276E ЗЕРКАЛО \u276F',
+colors:{red:'красный',green:'зелёный',blue:'синий',yellow:'жёлтый',purple:'фиолетовый',orange:'оранжевый',cyan:'голубой',pink:'розовый',indigo:'индиго',mint:'мятный'},
+comboX:'{n}x',
+score:'Счёт: {n}',
+best:'Рекорд: {n}'
+}
+};
+
+let lang=localStorage.getItem('colorStrikeLang')||'ru';
+function t(key,...args){
+const txt=LANG[lang]||LANG.ru;
+const parts=key.split('.');
+let val=txt;
+for(const p of parts)if(val)val=val[p];
+if(typeof val==='string'&&args.length>0)val=val.replace('{n}',args[0]);
+return val||key;
+}
+
 let allColors=[...COLORS];
 let bgColorIdx=0,targetBgColorIdx=0,bgTransition=1;
-let score=0,highScore=0;
+let score=0,highScore=parseInt(localStorage.getItem('colorStrikeBest'))||0;
 let gameRunning=false,gameOverFlag=false;
 let speed=2.0,baseSpeed=2.0;
 let frameCount=0;
@@ -208,7 +249,7 @@ gameRunning=false;gameOverFlag=true;
 slowMo=true;slowMoTimer=SLOW_MO_DURATION;
 createDeathParticles(x,y);
 playThud();shakeAmount=14;
-if(score>highScore)highScore=score;
+if(score>highScore){highScore=score;localStorage.setItem('colorStrikeBest',highScore)}
 }
 
 function startGame(){
@@ -226,12 +267,27 @@ dot.style.background=c.hex;dot.style.color=c.hex;
 colorIndEl.appendChild(dot);
 });
 const c=allColors[cur];
-if(c)colorLabelEl.innerHTML='&#9679; '+c.name;
+if(c)colorLabelEl.innerHTML='\u25cf '+(t('colors.'+c.name)||c.name);
 }
 
 function updateScoreUI(){
 scoreEl.textContent=Math.floor(score);
-comboEl.textContent=combo>1?combo+'x':'';
+comboEl.textContent=combo>1?t('comboX',combo):'';
+}
+
+function applyLang(){
+document.querySelectorAll('[data-key]').forEach(el=>{
+const key=el.dataset.key;
+const txt=t(key);
+if(txt!==key){
+if(el.tagName==='BUTTON'||el.tagName==='DIV')el.innerHTML=txt;
+else el.textContent=txt;
+}
+});
+document.querySelectorAll('.lang-opt input').forEach(r=>{
+r.checked=r.value===lang;
+});
+updateColorUI();
 }
 
 function update(dt){
@@ -246,8 +302,8 @@ if(shakeAmount>0)shakeAmount*=shakeDecay;
 if(slowMoTimer<=0){
 slowMo=false;
 gameOverEl.style.display='flex';
-finalScoreEl.textContent='Score: '+Math.floor(score);
-bestScoreEl.textContent='Best: '+Math.floor(highScore);
+finalScoreEl.textContent=t('score',Math.floor(score));
+bestScoreEl.textContent=t('best',Math.floor(highScore));
 }
 return;
 }
@@ -509,7 +565,7 @@ ctx.fillStyle='#fff';
 ctx.font='bold 12px system-ui,sans-serif';
 ctx.textAlign='center';
 ctx.textBaseline='top';
-ctx.fillText('\u276E MIRROR \u276F',W/2,6);
+ctx.fillText(t('mirror'),W/2,6);
 ctx.restore();
 }
 
@@ -635,6 +691,28 @@ restartBtn.addEventListener('touchend',e=>{e.stopPropagation();tapHandled=true;r
 gameOverEl.addEventListener('click',e=>{if(!slowMo)resetGame()});
 gameOverEl.addEventListener('touchend',e=>{if(!slowMo){e.preventDefault();resetGame()}});
 
+const settingsBtn=document.getElementById('settings-btn');
+const settingsOverlay=document.getElementById('settings-overlay');
+const settingsClose=document.getElementById('settings-close');
+
+function openSettings(){settingsOverlay.classList.add('show')}
+function closeSettings(){settingsOverlay.classList.remove('show')}
+
+settingsBtn.addEventListener('click',e=>{e.stopPropagation();openSettings()});
+settingsClose.addEventListener('click',e=>{e.stopPropagation();closeSettings()});
+settingsOverlay.addEventListener('click',e=>{if(e.target===settingsOverlay)closeSettings()});
+
+document.querySelectorAll('.lang-opt input').forEach(r=>{
+r.addEventListener('change',function(){
+if(this.checked){
+lang=this.value;
+localStorage.setItem('colorStrikeLang',lang);
+applyLang();
+}
+});
+});
+
+applyLang();
 updateColorUI();
 
 if('serviceWorker'in navigator){
