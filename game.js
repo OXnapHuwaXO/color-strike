@@ -224,7 +224,7 @@ slowMo=false;slowMoTimer=0;colorPulse=0;
 deathParticles=[];shakeAmount=0;
 obstacles=[];trackOffset=0;
 metronomeTick=0;
-gameOverFlag=false;gameRunning=true;
+gameOverFlag=false;gameRunning=true;tapHandled=false;
 prevScoreMilestone=0;prevColorMilestone=0;
 gameOverEl.style.display='none';
 updateColorUI();
@@ -623,6 +623,13 @@ colorPulse=1;
 updateColorUI();
 }
 
+function laneFromX(x){
+const r=x/W;
+if(r<0.33)return 0;
+if(r>0.67)return 2;
+return 1;
+}
+
 function onPointerDown(x,y){
 touchStartX=x;touchStartY=y;
 touchMoved=false;tapHandled=false;
@@ -631,10 +638,9 @@ touchMoved=false;tapHandled=false;
 function onPointerMove(x,y){
 const dx=x-touchStartX,dy=y-touchStartY;
 if(Math.abs(dx)>8||Math.abs(dy)>8)touchMoved=true;
-if(Math.abs(dx)>22&&gameRunning&&!gameOverFlag&&!slowMo){
-if(dx>0&&targetLane<2){targetLane++;laneTransition=0;touchStartX=x}
-else if(dx<0&&targetLane>0){targetLane--;laneTransition=0;touchStartX=x}
-tapHandled=true;
+if(gameRunning&&!gameOverFlag&&!slowMo){
+const newLane=laneFromX(x);
+if(newLane!==targetLane){targetLane=newLane;laneTransition=0;tapHandled=true}
 }
 }
 
@@ -648,14 +654,12 @@ let started=false;
 
 canvas.addEventListener('touchstart',e=>{
 e.preventDefault();
-const t=e.touches[0];
-onPointerDown(t.clientX,t.clientY);
+onPointerDown(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:false});
 
 canvas.addEventListener('touchmove',e=>{
 e.preventDefault();
-const t=e.touches[0];
-onPointerMove(t.clientX,t.clientY);
+onPointerMove(e.touches[0].clientX,e.touches[0].clientY);
 },{passive:false});
 
 canvas.addEventListener('touchend',e=>{
